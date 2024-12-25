@@ -10,7 +10,9 @@
 }
 
 body {
-    background: #4CAF50;
+    background: linear-gradient(45deg, #90EE90, #228B22);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
     position: relative;
     overflow-x: hidden;
 }
@@ -31,7 +33,7 @@ body {
     height: 200%;
     top: -50%;
     left: -50%;
-    background: rgba(255, 255, 255, 0.1);
+    background: linear-gradient(45deg, #90EE90, #228B22);
     border-radius: 40%;
     animation: wave 15s infinite linear;
 }
@@ -43,7 +45,7 @@ body {
     height: 200%;
     top: -50%;
     left: -50%;
-    background: rgba(255, 255, 255, 0.2);
+    background: linear-gradient(45deg, #98FB98, #006400);
     border-radius: 35%;
     animation: wave 25s infinite linear;
 }
@@ -53,8 +55,20 @@ body {
     100% { transform: rotate(360deg); }
 }
 
+@keyframes gradientBG {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
 .navbar {
-    background: #2E7D32;
+    background: rgba(46, 125, 50, 0.9);
     padding: 1rem;
     color: white;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -71,7 +85,7 @@ body {
 }
 
 .category-btn {
-    background: #2E7D32;
+    background: rgba(46, 125, 50, 0.8);
     color: white;
     padding: 8px 16px;
     border: none;
@@ -81,12 +95,12 @@ body {
 }
 
 .category-btn:hover {
-    background: #1B5E20;
+    background: rgba(27, 94, 32, 0.9);
     transform: scale(1.05);
 }
 
 .category-btn.active {
-    background: #1B5E20;
+    background: rgba(27, 94, 32, 1);
     box-shadow: 0 0 10px rgba(0,0,0,0.2);
 }
 
@@ -196,7 +210,7 @@ body {
     background: #1B5E20;
 }
 
-.upload-modal, .login-modal, .signup-modal, .wallet-modal, .admin-wallet-modal {
+.upload-modal, .login-modal, .signup-modal, .wallet-modal, .admin-wallet-modal, .my-games-modal {
     display: none;
     position: fixed;
     top: 0;
@@ -258,6 +272,10 @@ body {
     cursor: pointer;
 }
 
+.file-input-label.video {
+    background: #e6f3ff;
+}
+
 .earnings-info {
     margin: 10px 0;
 }
@@ -282,6 +300,77 @@ body {
     cursor: pointer;
     margin-left: 10px;
 }
+
+.download-app-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 100;
+}
+
+.download-app-btn {
+  background: #1B5E20;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 16px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  transition: all 0.3s;
+}
+
+.download-app-btn:hover {
+  background: #2E7D32;
+  transform: scale(1.05);
+}
+
+/* Add to the game-card CSS class */
+.game-video {
+  width: 100%;
+  height: 200px;
+  background: #000;
+  border-radius: 8px;
+  margin: 10px 0;
+  display: none;
+}
+
+/* Add to existing CSS */
+.my-games-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+}
+
+.game-stats {
+    margin: 10px 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.edit-game-btn {
+    background: #2E7D32;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.delete-game-btn {
+    background: #d32f2f;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+}
 </style>
 </head>
 <body>
@@ -294,6 +383,7 @@ body {
             <button onclick="logout()" id="logoutBtn" style="display: none;">Cerrar Sesi&#xf3;n</button>
             <button onclick="showWalletModal()" id="walletBtn" style="display: none;">Billetera</button>
             <button onclick="showAdminWalletModal()" class="admin-wallet-btn">Ganancias App</button>
+            <button onclick="showMyGames()" id="myGamesBtn" style="display: none;">Mis Juegos</button>
         </div>
     </div>
 
@@ -341,6 +431,10 @@ body {
                 <div class="file-input-label">
                     <input type="file" accept=".apk" required id="gameInput">
                     <label for="gameInput">Subir Archivo del Juego (APK)</label>
+                </div>
+                <div class="file-input-label video">
+                    <input type="file" accept="video/*" id="demoVideo">
+                    <label for="demoVideo">Subir Video Demostrativo (Opcional)</label>
                 </div>
                 <button type="submit" class="upload-btn">Subir Juego</button>
                 <button type="button" class="upload-btn" onclick="hideUploadModal()">Cancelar</button>
@@ -433,6 +527,20 @@ body {
         </div>
     </div>
 
+    <div class="my-games-modal" id="myGamesModal">
+        <div class="modal-content">
+            <h2>Mis Juegos</h2>
+            <div id="myGamesList">
+                <!-- Games will be loaded here -->
+            </div>
+            <button type="button" class="upload-btn" onclick="hideMyGamesModal()">Cerrar</button>
+        </div>
+    </div>
+
+    <div class="download-app-container">
+      <button onclick="downloadApp()" class="download-app-btn">Descargar App Play Gamer</button>
+    </div>
+
 <script>const games = [{
   title: "Super Adventure",
   description: "Un emocionante juego de aventuras con gráficos increíbles",
@@ -442,7 +550,8 @@ body {
   creator: "",
   sales: 0,
   platformFee: 0.2,
-  creatorShare: 0.8
+  creatorShare: 0.8,
+  demoVideo: ""
 }, {
   title: "Racing Master",
   description: "El mejor juego de carreras para tu dispositivo",
@@ -452,7 +561,8 @@ body {
   creator: "",
   sales: 0,
   platformFee: 0.2,
-  creatorShare: 0.8
+  creatorShare: 0.8,
+  demoVideo: ""
 }, {
   title: "Puzzle Quest",
   description: "Resuelve increíbles puzzles y desafía tu mente",
@@ -462,7 +572,8 @@ body {
   creator: "",
   sales: 0,
   platformFee: 0.2,
-  creatorShare: 0.8
+  creatorShare: 0.8,
+  demoVideo: ""
 }, {
   title: "Zombie Shooter",
   description: "Sobrevive al apocalipsis zombie",
@@ -472,7 +583,8 @@ body {
   creator: "",
   sales: 0,
   platformFee: 0.2,
-  creatorShare: 0.8
+  creatorShare: 0.8,
+  demoVideo: ""
 }, {
   title: "Cookie Clicker",
   description: "Construye tu imperio de galletas",
@@ -482,7 +594,8 @@ body {
   creator: "",
   sales: 0,
   platformFee: 0.2,
-  creatorShare: 0.8
+  creatorShare: 0.8,
+  demoVideo: ""
 }, {
   title: "Farm Life",
   description: "Gestiona tu propia granja",
@@ -492,7 +605,8 @@ body {
   creator: "",
   sales: 0,
   platformFee: 0.2,
-  creatorShare: 0.8
+  creatorShare: 0.8,
+  demoVideo: ""
 }];
 let currentCategory = 'todos';
 let currentUser = null;
@@ -500,16 +614,25 @@ let platformEarnings = 0;
 let adminPaypalEmail = localStorage.getItem('adminPaypalEmail') || '';
 function loadGames(category = 'todos') {
   const gamesGrid = document.getElementById('gamesGrid');
+  if (!gamesGrid) return;
   gamesGrid.innerHTML = '';
   const filteredGames = category === 'todos' ? games : games.filter(game => game.category === category);
   filteredGames.forEach(game => {
+    if (!game || !game.title) return;
     const gameCard = document.createElement('div');
     gameCard.className = 'game-card';
+    const videoElement = game.demoVideo ? `
+      <video class="game-video" controls>
+        <source src="${game.demoVideo}" type="video/mp4">
+        Tu navegador no soporta videos HTML5.
+      </video>
+    ` : '';
     gameCard.innerHTML = `
-      <div class="game-logo">${game.logo}</div>
-      <div class="game-category">${game.category.toUpperCase()}</div>
+      <div class="game-logo">${game.logo || "🎮"}</div>
+      <div class="game-category">${(game.category || "").toUpperCase()}</div>
       <div class="game-title">${game.title}</div>
-      <div class="game-description">${game.description}</div>
+      ${videoElement}
+      <div class="game-description">${game.description || ""}</div>
       <div class="game-price">${game.price > 0 ? `$${game.price.toFixed(2)}` : 'GRATIS'}</div>
       <button class="download-btn" onclick="handleDownload('${game.title}', ${game.price})">
         ${game.price > 0 ? 'Comprar APK' : 'Descargar APK'}
@@ -532,29 +655,100 @@ function showUploadModal() {
     showLoginModal();
     return;
   }
-  document.getElementById('uploadModal').style.display = 'block';
+  const modal = document.getElementById('uploadModal');
+  if (modal) {
+    modal.style.display = 'block';
+  }
 }
 function hideUploadModal() {
   document.getElementById('uploadModal').style.display = 'none';
 }
 function handleUpload(event) {
   event.preventDefault();
-  const formData = new FormData(event.target);
-  const newGame = {
-    title: formData.get('title'),
-    description: formData.get('description'),
-    category: formData.get('category'),
-    logo: formData.get('logo'),
-    price: parseFloat(formData.get('price')) || 0,
+  const form = event.target;
+  const videoInput = form.querySelector('#demoVideo');
+  const apkInput = form.querySelector('#gameInput');
+  const videoUrl = videoInput.files.length > 0 ? URL.createObjectURL(videoInput.files[0]) : '';
+  const hasAPK = apkInput.files.length > 0;
+
+  if (!hasAPK) {
+    alert('Error: Debes subir un archivo APK válido');
+    return;
+  }
+
+  const editGameTitle = form.querySelector('input[name="editGameTitle"]');
+  const isEditing = editGameTitle && editGameTitle.value;
+
+  const gameData = {
+    title: form.querySelector('input[placeholder="Nombre del juego"]').value,
+    description: form.querySelector('textarea').value,
+    category: form.querySelector('select').value,
+    logo: "🎮",
+    price: parseFloat(form.querySelector('#gamePrice').value) || 0,
     creator: currentUser.username,
-    sales: 0,
+    sales: isEditing ? games.find(g => g.title === editGameTitle.value)?.sales || 0 : 0,
     platformFee: 0.2,
-    creatorShare: 0.8
+    creatorShare: 0.8,
+    demoVideo: videoUrl,
+    hasAPK: true
   };
-  games.push(newGame);
-  alert('¡Juego subido exitosamente!');
+
+  if (isEditing) {
+    const gameIndex = games.findIndex(g => g.title === editGameTitle.value);
+    if (gameIndex !== -1) {
+      games[gameIndex] = gameData;
+    }
+  } else {
+    games.push(gameData);
+  }
+
+  alert(isEditing ? '¡Juego actualizado exitosamente!' : '¡Juego subido exitosamente!');
   hideUploadModal();
   loadGames(currentCategory);
+}
+function handleDownload(gameTitle, price) {
+  if (!currentUser) {
+    alert('Debes iniciar sesión para descargar juegos');
+    showLoginModal();
+    return;
+  }
+
+  const gameIndex = games.findIndex(g => g.title === gameTitle);
+  const game = games[gameIndex];
+
+  // Simulate checking if APK file exists/is valid
+  const hasValidAPK = Math.random() > 0.5; // This simulates APK check - replace with real check
+
+  if (!hasValidAPK) {
+    alert('Error: El archivo APK no está disponible. El juego será eliminado.');
+    // Remove the game from array
+    if (gameIndex > -1) {
+      games.splice(gameIndex, 1);
+      // Refresh the games display
+      loadGames(currentCategory);
+    }
+    return;
+  }
+
+  if (price > 0) {
+    if (confirm(`¿Confirmas la compra de ${gameTitle} por $${price.toFixed(2)}?`)) {
+      game.sales++;
+      const platformRevenue = price * 0.2;
+      const creatorRevenue = price * 0.8;
+      platformEarnings += platformRevenue;
+      localStorage.setItem('platformEarnings', platformEarnings.toString());
+      
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const creator = users.find(u => u.username === game.creator);
+      if (creator) {
+        creator.earnings = (creator.earnings || 0) + creatorRevenue;
+        localStorage.setItem('users', JSON.stringify(users));
+      }
+      alert('¡Compra exitosa! Iniciando descarga...');
+    }
+  } else {
+    alert('Iniciando descarga...');
+  }
 }
 function showLoginModal() {
   document.getElementById('loginModal').style.display = 'block';
@@ -624,18 +818,21 @@ function updateAuthUI() {
   const logoutBtn = document.getElementById('logoutBtn');
   const uploadBtn = document.querySelector('.upload-btn');
   const walletBtn = document.getElementById('walletBtn');
+  const myGamesBtn = document.getElementById('myGamesBtn');
   if (currentUser) {
     loginBtn.style.display = 'none';
     signupBtn.style.display = 'none';
     logoutBtn.style.display = 'inline-block';
     uploadBtn.style.display = 'inline-block';
     walletBtn.style.display = 'inline-block';
+    myGamesBtn.style.display = 'inline-block';
   } else {
     loginBtn.style.display = 'inline-block';
     signupBtn.style.display = 'inline-block';
     logoutBtn.style.display = 'none';
     uploadBtn.style.display = 'none';
     walletBtn.style.display = 'none';
+    myGamesBtn.style.display = 'none';
   }
 }
 function showWalletModal() {
@@ -714,7 +911,24 @@ function handleDownload(gameTitle, price) {
     showLoginModal();
     return;
   }
-  const game = games.find(g => g.title === gameTitle);
+
+  const gameIndex = games.findIndex(g => g.title === gameTitle);
+  const game = games[gameIndex];
+
+  // Simulate checking if APK file exists/is valid
+  const hasValidAPK = Math.random() > 0.5; // This simulates APK check - replace with real check
+
+  if (!hasValidAPK) {
+    alert('Error: El archivo APK no está disponible. El juego será eliminado.');
+    // Remove the game from array
+    if (gameIndex > -1) {
+      games.splice(gameIndex, 1);
+      // Refresh the games display
+      loadGames(currentCategory);
+    }
+    return;
+  }
+
   if (price > 0) {
     if (confirm(`¿Confirmas la compra de ${gameTitle} por $${price.toFixed(2)}?`)) {
       game.sales++;
@@ -722,6 +936,7 @@ function handleDownload(gameTitle, price) {
       const creatorRevenue = price * 0.8;
       platformEarnings += platformRevenue;
       localStorage.setItem('platformEarnings', platformEarnings.toString());
+      
       const users = JSON.parse(localStorage.getItem('users') || '[]');
       const creator = users.find(u => u.username === game.creator);
       if (creator) {
@@ -764,6 +979,71 @@ function handleAdminPaypalSetup(event) {
   localStorage.setItem('adminPaypalEmail', email);
   document.getElementById('currentAdminPaypal').textContent = `PayPal para recibir ganancias: ${email}`;
   alert('PayPal configurado exitosamente. Todas las ganancias de la app (20% de las ventas) serán enviadas a esta cuenta.');
+}
+function downloadApp() {
+  const link = document.createElement('a');
+  link.href = "play-gamer.apk";
+  link.download = "play-gamer.apk";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  alert('Descargando Play Gamer APK...');
+}
+function showMyGames() {
+  if (!currentUser) return;
+  const modal = document.getElementById('myGamesModal');
+  const gamesList = document.getElementById('myGamesList');
+  gamesList.innerHTML = '';
+  const userGames = games.filter(game => game.creator === currentUser.username);
+  userGames.forEach(game => {
+    const gameDiv = document.createElement('div');
+    gameDiv.className = 'game-card';
+    const totalRevenue = game.sales * game.price;
+    const creatorRevenue = totalRevenue * game.creatorShare;
+    gameDiv.innerHTML = `
+      <div class="game-logo">${game.logo || "🎮"}</div>
+      <div class="game-category">${game.category.toUpperCase()}</div>
+      <div class="game-title">${game.title}</div>
+      <div class="game-description">${game.description}</div>
+      <div class="game-price">$${game.price.toFixed(2)}</div>
+      <div class="game-stats">
+        Ventas totales: ${game.sales}<br>
+        Ingresos totales: $${totalRevenue.toFixed(2)}<br>
+        Tus ganancias: $${creatorRevenue.toFixed(2)}
+      </div>
+      <button class="edit-game-btn" onclick="editGame('${game.title}')">Editar</button>
+      <button class="delete-game-btn" onclick="deleteGame('${game.title}')">Eliminar</button>
+    `;
+    gamesList.appendChild(gameDiv);
+  });
+  modal.style.display = 'block';
+}
+function hideMyGamesModal() {
+  document.getElementById('myGamesModal').style.display = 'none';
+}
+function editGame(gameTitle) {
+  const game = games.find(g => g.title === gameTitle);
+  if (!game) return;
+  showUploadModal();
+  const form = document.querySelector('.upload-form');
+  form.querySelector('input[placeholder="Nombre del juego"]').value = game.title;
+  form.querySelector('textarea').value = game.description;
+  form.querySelector('select').value = game.category;
+  form.querySelector('#gamePrice').value = game.price;
+  const editField = document.createElement('input');
+  editField.type = 'hidden';
+  editField.name = 'editGameTitle';
+  editField.value = gameTitle;
+  form.appendChild(editField);
+}
+function deleteGame(gameTitle) {
+  if (!confirm(`¿Estás seguro de que quieres eliminar ${gameTitle}?`)) return;
+  const gameIndex = games.findIndex(g => g.title === gameTitle);
+  if (gameIndex !== -1) {
+    games.splice(gameIndex, 1);
+    showMyGames();
+    loadGames(currentCategory);
+  }
 }
 updateAuthUI();
 loadGames();</script>
