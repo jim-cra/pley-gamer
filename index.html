@@ -338,7 +338,10 @@ body {
 /* Add to existing CSS */
 .my-games-modal {
     display: none;
-    position: fixed;
+   
+  .
+  .
+  position: fixed;
     top: 0;
     left: 0;
     width: 100%;
@@ -370,6 +373,149 @@ body {
     border: none;
     border-radius: 20px;
     cursor: pointer;
+}
+
+/* Add new styles for comments */
+.game-comments {
+  margin-top: 15px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+}
+
+.comment {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.comment-author {
+  font-weight: bold;
+  color: #2E7D32;
+}
+
+.comment-date {
+  font-size: 12px;
+  color: #666;
+}
+
+.comment-form {
+  margin-top: 10px;
+}
+
+.comment-input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.creator-info {
+  margin: 10px 0;
+  font-size: 14px;
+  color: #2E7D32;
+  font-weight: bold;
+}
+
+.chat-container {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 300px;
+  height: 400px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  transform: translateX(-120%);
+  transition: transform 0.3s;
+}
+
+.chat-container.open {
+  transform: translateX(0);
+}
+
+.chat-header {
+  padding: 10px;
+  background: #2E7D32;
+  color: white;
+  border-radius: 10px 10px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-toggle {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.chat-message {
+  margin-bottom: 10px;
+  padding: 8px;
+  border-radius: 8px;
+  max-width: 80%;
+}
+
+.chat-message.sent {
+  background: #E8F5E9;
+  margin-left: auto;
+}
+
+.chat-message.received {
+  background: #F5F5F5;
+}
+
+.message-author {
+  font-weight: bold;
+  font-size: 12px;
+  margin-bottom: 4px;
+  color: #2E7D32;
+}
+
+.message-time {
+  font-size: 10px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.chat-form {
+  padding: 10px;
+  border-top: 1px solid #eee;
+  display: flex;
+  gap: 10px;
+}
+
+.chat-form input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  outline: none;
+}
+
+.chat-form button {
+  background: #2E7D32;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.chat-form button:hover {
+  background: #1B5E20;
 }
 </style>
 </head>
@@ -541,6 +687,18 @@ body {
       <button onclick="downloadApp()" class="download-app-btn">Descargar App Play Gamer</button>
     </div>
 
+    <div id="chatContainer" class="chat-container">
+      <div class="chat-header">
+        <h3>Chat Global</h3>
+        <button onclick="toggleChat()" class="chat-toggle">&#x2261;</button>
+      </div>
+      <div id="chatMessages" class="chat-messages"></div>
+      <form id="chatForm" class="chat-form" onsubmit="sendMessage(event)">
+        <input type="text" id="messageInput" placeholder="Escribe un mensaje..." required>
+        <button type="submit">Enviar</button>
+      </form>
+    </div>
+
 <script>const games = [{
   title: "Super Adventure",
   description: "Un emocionante juego de aventuras con gráficos increíbles",
@@ -612,6 +770,8 @@ let currentCategory = 'todos';
 let currentUser = null;
 let platformEarnings = 0;
 let adminPaypalEmail = localStorage.getItem('adminPaypalEmail') || '';
+let chatMessages = [];
+let isChatOpen = false;
 function loadGames(category = 'todos') {
   const gamesGrid = document.getElementById('gamesGrid');
   if (!gamesGrid) return;
@@ -621,22 +781,38 @@ function loadGames(category = 'todos') {
     if (!game || !game.title) return;
     const gameCard = document.createElement('div');
     gameCard.className = 'game-card';
-    const videoElement = game.demoVideo ? `
-      <video class="game-video" controls>
-        <source src="${game.demoVideo}" type="video/mp4">
-        Tu navegador no soporta videos HTML5.
-      </video>
-    ` : '';
     gameCard.innerHTML = `
       <div class="game-logo">${game.logo || "🎮"}</div>
+      <div class="creator-info">Creador: ${game.creator || "Anónimo"}</div>
       <div class="game-category">${(game.category || "").toUpperCase()}</div>
       <div class="game-title">${game.title}</div>
-      ${videoElement}
+      ${game.demoVideo ? `
+        <video class="game-video" controls style="display: block;">
+          <source src="${game.demoVideo}" type="video/mp4">
+          Tu navegador no soporta videos HTML5.
+        </video>
+      ` : ''}
       <div class="game-description">${game.description || ""}</div>
       <div class="game-price">${game.price > 0 ? `$${game.price.toFixed(2)}` : 'GRATIS'}</div>
       <button class="download-btn" onclick="handleDownload('${game.title}', ${game.price})">
         ${game.price > 0 ? 'Comprar APK' : 'Descargar APK'}
       </button>
+      
+      <div class="game-comments">
+        <h3>Comentarios</h3>
+        ${game.comments ? game.comments.map(comment => `
+          <div class="comment">
+            <div class="comment-author">${comment.author}</div>
+            <div class="comment-date">${new Date(comment.date).toLocaleDateString()}</div>
+            <div class="comment-text">${comment.text}</div>
+          </div>
+        `).join('') : ''}
+        
+        <form class="comment-form" onsubmit="event.preventDefault(); addGameComment('${game.title}', this.querySelector('.comment-input').value); this.querySelector('.comment-input').value = '';">
+          <input class="comment-input" placeholder="Escribe un comentario..." required>
+          <button type="submit" class="download-btn">Comentar</button>
+        </form>
+      </div>
     `;
     gamesGrid.appendChild(gameCard);
   });
@@ -670,15 +846,13 @@ function handleUpload(event) {
   const apkInput = form.querySelector('#gameInput');
   const videoUrl = videoInput.files.length > 0 ? URL.createObjectURL(videoInput.files[0]) : '';
   const hasAPK = apkInput.files.length > 0;
-
   if (!hasAPK) {
     alert('Error: Debes subir un archivo APK válido');
     return;
   }
-
+  const apkUrl = URL.createObjectURL(apkInput.files[0]);
   const editGameTitle = form.querySelector('input[name="editGameTitle"]');
   const isEditing = editGameTitle && editGameTitle.value;
-
   const gameData = {
     title: form.querySelector('input[placeholder="Nombre del juego"]').value,
     description: form.querySelector('textarea').value,
@@ -686,13 +860,15 @@ function handleUpload(event) {
     logo: "🎮",
     price: parseFloat(form.querySelector('#gamePrice').value) || 0,
     creator: currentUser.username,
+    creatorName: currentUser.creatorName,
     sales: isEditing ? games.find(g => g.title === editGameTitle.value)?.sales || 0 : 0,
     platformFee: 0.2,
     creatorShare: 0.8,
     demoVideo: videoUrl,
-    hasAPK: true
+    apkFile: apkUrl,
+    hasAPK: true,
+    comments: isEditing ? games.find(g => g.title === editGameTitle.value)?.comments || [] : []
   };
-
   if (isEditing) {
     const gameIndex = games.findIndex(g => g.title === editGameTitle.value);
     if (gameIndex !== -1) {
@@ -701,54 +877,9 @@ function handleUpload(event) {
   } else {
     games.push(gameData);
   }
-
   alert(isEditing ? '¡Juego actualizado exitosamente!' : '¡Juego subido exitosamente!');
   hideUploadModal();
   loadGames(currentCategory);
-}
-function handleDownload(gameTitle, price) {
-  if (!currentUser) {
-    alert('Debes iniciar sesión para descargar juegos');
-    showLoginModal();
-    return;
-  }
-
-  const gameIndex = games.findIndex(g => g.title === gameTitle);
-  const game = games[gameIndex];
-
-  // Simulate checking if APK file exists/is valid
-  const hasValidAPK = Math.random() > 0.5; // This simulates APK check - replace with real check
-
-  if (!hasValidAPK) {
-    alert('Error: El archivo APK no está disponible. El juego será eliminado.');
-    // Remove the game from array
-    if (gameIndex > -1) {
-      games.splice(gameIndex, 1);
-      // Refresh the games display
-      loadGames(currentCategory);
-    }
-    return;
-  }
-
-  if (price > 0) {
-    if (confirm(`¿Confirmas la compra de ${gameTitle} por $${price.toFixed(2)}?`)) {
-      game.sales++;
-      const platformRevenue = price * 0.2;
-      const creatorRevenue = price * 0.8;
-      platformEarnings += platformRevenue;
-      localStorage.setItem('platformEarnings', platformEarnings.toString());
-      
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      const creator = users.find(u => u.username === game.creator);
-      if (creator) {
-        creator.earnings = (creator.earnings || 0) + creatorRevenue;
-        localStorage.setItem('users', JSON.stringify(users));
-      }
-      alert('¡Compra exitosa! Iniciando descarga...');
-    }
-  } else {
-    alert('Iniciando descarga...');
-  }
 }
 function showLoginModal() {
   document.getElementById('loginModal').style.display = 'block';
@@ -775,6 +906,9 @@ function handleLogin(event) {
     hideLoginModal();
     updateAuthUI();
     alert('¡Bienvenido ' + user.username + '!');
+    if (currentUser) {
+      displayMessages();
+    }
   } else {
     document.getElementById('loginError').style.display = 'block';
   }
@@ -826,6 +960,7 @@ function updateAuthUI() {
     uploadBtn.style.display = 'inline-block';
     walletBtn.style.display = 'inline-block';
     myGamesBtn.style.display = 'inline-block';
+    displayMessages();
   } else {
     loginBtn.style.display = 'inline-block';
     signupBtn.style.display = 'inline-block';
@@ -833,6 +968,8 @@ function updateAuthUI() {
     uploadBtn.style.display = 'none';
     walletBtn.style.display = 'none';
     myGamesBtn.style.display = 'none';
+    chatMessages = [];
+    displayMessages();
   }
 }
 function showWalletModal() {
@@ -911,24 +1048,23 @@ function handleDownload(gameTitle, price) {
     showLoginModal();
     return;
   }
-
   const gameIndex = games.findIndex(g => g.title === gameTitle);
   const game = games[gameIndex];
-
-  // Simulate checking if APK file exists/is valid
-  const hasValidAPK = Math.random() > 0.5; // This simulates APK check - replace with real check
-
+  const downloadLink = document.createElement('a');
+  downloadLink.style.display = 'none';
+  downloadLink.href = game.apkFile || `${gameTitle.toLowerCase().replace(/\s+/g, '-')}.apk`;
+  downloadLink.download = `${gameTitle.toLowerCase().replace(/\s+/g, '-')}.apk`;
+  document.body.appendChild(downloadLink);
+  const hasValidAPK = Math.random() > 0.5;
   if (!hasValidAPK) {
     alert('Error: El archivo APK no está disponible. El juego será eliminado.');
-    // Remove the game from array
     if (gameIndex > -1) {
       games.splice(gameIndex, 1);
-      // Refresh the games display
       loadGames(currentCategory);
     }
+    document.body.removeChild(downloadLink);
     return;
   }
-
   if (price > 0) {
     if (confirm(`¿Confirmas la compra de ${gameTitle} por $${price.toFixed(2)}?`)) {
       game.sales++;
@@ -936,16 +1072,19 @@ function handleDownload(gameTitle, price) {
       const creatorRevenue = price * 0.8;
       platformEarnings += platformRevenue;
       localStorage.setItem('platformEarnings', platformEarnings.toString());
-      
       const users = JSON.parse(localStorage.getItem('users') || '[]');
       const creator = users.find(u => u.username === game.creator);
       if (creator) {
         creator.earnings = (creator.earnings || 0) + creatorRevenue;
         localStorage.setItem('users', JSON.stringify(users));
       }
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
       alert('¡Compra exitosa! Iniciando descarga...');
     }
   } else {
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
     alert('Iniciando descarga...');
   }
 }
@@ -1044,6 +1183,65 @@ function deleteGame(gameTitle) {
     showMyGames();
     loadGames(currentCategory);
   }
+}
+function addGameComment(gameTitle, comment) {
+  if (!currentUser) {
+    alert('Debes iniciar sesión para comentar');
+    showLoginModal();
+    return;
+  }
+  const game = games.find(g => g.title === gameTitle);
+  if (!game.comments) {
+    game.comments = [];
+  }
+  game.comments.push({
+    author: currentUser.username,
+    text: comment,
+    date: new Date().toISOString()
+  });
+  loadGames(currentCategory);
+}
+function toggleChat() {
+  const chatContainer = document.getElementById('chatContainer');
+  isChatOpen = !isChatOpen;
+  chatContainer.classList.toggle('open');
+}
+function sendMessage(event) {
+  event.preventDefault();
+  if (!currentUser) {
+    alert('Debes iniciar sesión para chatear');
+    showLoginModal();
+    return;
+  }
+  const messageInput = document.getElementById('messageInput');
+  const message = messageInput.value.trim();
+  if (message) {
+    const newMessage = {
+      author: currentUser.username,
+      text: message,
+      time: new Date().toISOString()
+    };
+    chatMessages.push(newMessage);
+    displayMessages();
+    messageInput.value = '';
+    const chatMessagesDiv = document.getElementById('chatMessages');
+    chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+  }
+}
+function displayMessages() {
+  const chatMessagesDiv = document.getElementById('chatMessages');
+  chatMessagesDiv.innerHTML = chatMessages.map(msg => {
+    const isSentByCurrentUser = currentUser && msg.author === currentUser.username;
+    const messageClass = isSentByCurrentUser ? 'sent' : 'received';
+    const time = new Date(msg.time).toLocaleTimeString();
+    return `
+      <div class="chat-message ${messageClass}">
+        <div class="message-author">${msg.author}</div>
+        <div class="message-text">${msg.text}</div>
+        <div class="message-time">${time}</div>
+      </div>
+    `;
+  }).join('');
 }
 updateAuthUI();
 loadGames();</script>
