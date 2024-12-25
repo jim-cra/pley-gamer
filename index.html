@@ -1,0 +1,771 @@
+<html><head><base href="https://google.com"><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Play Gamer</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    background: #4CAF50;
+    position: relative;
+    overflow-x: hidden;
+}
+
+.wave {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+.wave::before {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 40%;
+    animation: wave 15s infinite linear;
+}
+
+.wave::after {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 35%;
+    animation: wave 25s infinite linear;
+}
+
+@keyframes wave {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.navbar {
+    background: #2E7D32;
+    padding: 1rem;
+    color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    justify-content: center;
+}
+
+.category-btn {
+    background: #2E7D32;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.category-btn:hover {
+    background: #1B5E20;
+    transform: scale(1.05);
+}
+
+.category-btn.active {
+    background: #1B5E20;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+
+.search-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+.search-box {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #2E7D32;
+    border-radius: 25px;
+    font-size: 16px;
+    outline: none;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.upload-btn {
+    background: #2E7D32;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    margin: 20px;
+    font-size: 16px;
+    transition: background 0.3s;
+}
+
+.upload-btn:hover {
+    background: #1B5E20;
+}
+
+.games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.game-card {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+}
+
+.game-card:hover {
+    transform: translateY(-5px);
+}
+
+.game-logo {
+    width: 100%;
+    height: 150px;
+    background: #eee;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 50px;
+}
+
+.game-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.game-description {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.game-category {
+    font-size: 12px;
+    color: #2E7D32;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.game-price {
+    font-size: 16px;
+    color: #2E7D32;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.download-btn {
+    background: #2E7D32;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.3s;
+}
+
+.download-btn:hover {
+    background: #1B5E20;
+}
+
+.upload-modal, .login-modal, .signup-modal, .wallet-modal, .admin-wallet-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    margin: 50px auto;
+}
+
+.upload-form input, .upload-form textarea, .upload-form select,
+.login-form input, .signup-form input, .wallet-form input, .wallet-form select, .admin-wallet-form input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.auth-error {
+    color: red;
+    font-size: 14px;
+    margin: 5px 0;
+    display: none;
+}
+
+.user-menu {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+}
+
+.user-menu button {
+    background: #2E7D32;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.file-input-label {
+    display: block;
+    background: #f5f5f5;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.earnings-info {
+    margin: 10px 0;
+}
+
+.earnings-info h3 {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.fee-info {
+    font-size: 12px;
+    color: #666;
+}
+
+.admin-wallet-btn {
+    background: #1B5E20;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+</style>
+</head>
+<body>
+    <div class="wave"></div>
+    <div class="navbar">
+        <h1>Play Gamer</h1>
+        <div class="user-menu">
+            <button onclick="showLoginModal()" id="loginBtn">Iniciar Sesi&#xf3;n</button>
+            <button onclick="showSignupModal()" id="signupBtn">Registrarse</button>
+            <button onclick="logout()" id="logoutBtn" style="display: none;">Cerrar Sesi&#xf3;n</button>
+            <button onclick="showWalletModal()" id="walletBtn" style="display: none;">Billetera</button>
+            <button onclick="showAdminWalletModal()" class="admin-wallet-btn">Ganancias App</button>
+        </div>
+    </div>
+
+    <div class="search-container">
+        <input type="text" class="search-box" placeholder="Buscar juegos...">
+        <button class="upload-btn" onclick="showUploadModal()">Subir Nuevo Juego</button>
+    </div>
+
+    <div class="categories" id="categories">
+        <button class="category-btn active" data-category="todos">Todos</button>
+        <button class="category-btn" data-category="aventura">Aventura</button>
+        <button class="category-btn" data-category="carreras">Carreras</button>
+        <button class="category-btn" data-category="puzzle">Puzzle</button>
+        <button class="category-btn" data-category="desafio">Desaf&#xed;o</button>
+        <button class="category-btn" data-category="disparos">Disparos</button>
+        <button class="category-btn" data-category="idle">Idle</button>
+        <button class="category-btn" data-category="simulador">Simulador</button>
+    </div>
+
+    <div class="games-grid" id="gamesGrid">
+        <!-- Los juegos se cargarán aquí dinámicamente -->
+    </div>
+
+    <div class="upload-modal" id="uploadModal">
+        <div class="modal-content">
+            <h2>Subir Nuevo Juego</h2>
+            <form class="upload-form" onsubmit="handleUpload(event)">
+                <input type="text" placeholder="Nombre del juego" required>
+                <textarea placeholder="Descripci&#xf3;n del juego" required></textarea>
+                <select required>
+                    <option value>Seleccionar categor&#xed;a</option>
+                    <option value="aventura">Aventura</option>
+                    <option value="carreras">Carreras</option>
+                    <option value="puzzle">Puzzle</option>
+                    <option value="desafio">Desaf&#xed;o</option>
+                    <option value="disparos">Disparos</option>
+                    <option value="idle">Idle</option>
+                    <option value="simulador">Simulador</option>
+                </select>
+                <input type="number" step="0.01" min="0" placeholder="Precio del juego (USD)" id="gamePrice" required>
+                <div class="file-input-label">
+                    <input type="file" accept="image/*" required id="logoInput">
+                    <label for="logoInput">Subir Logo del Juego</label>
+                </div>
+                <div class="file-input-label">
+                    <input type="file" accept=".apk" required id="gameInput">
+                    <label for="gameInput">Subir Archivo del Juego (APK)</label>
+                </div>
+                <button type="submit" class="upload-btn">Subir Juego</button>
+                <button type="button" class="upload-btn" onclick="hideUploadModal()">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="login-modal" id="loginModal">
+        <div class="modal-content">
+            <h2>Iniciar Sesi&#xf3;n</h2>
+            <form class="login-form" onsubmit="handleLogin(event)">
+                <input type="text" placeholder="Nombre de usuario" required id="loginUsername">
+                <input type="password" placeholder="Contrase&#xf1;a" required id="loginPassword">
+                <div class="auth-error" id="loginError">Usuario o contrase&#xf1;a incorrectos</div>
+                <button type="submit" class="upload-btn">Iniciar Sesi&#xf3;n</button>
+                <button type="button" class="upload-btn" onclick="hideLoginModal()">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="signup-modal" id="signupModal">
+        <div class="modal-content">
+            <h2>Registrarse</h2>
+            <form class="signup-form" onsubmit="handleSignup(event)">
+                <input type="text" placeholder="Nombre de usuario" required id="signupUsername">
+                <input type="password" placeholder="Contrase&#xf1;a" required id="signupPassword">
+                <input type="password" placeholder="Confirmar contrase&#xf1;a" required id="signupConfirmPassword">
+                <input type="text" placeholder="Nombre del creador" required id="creatorName">
+                <div class="auth-error" id="signupError">Las contrase&#xf1;as no coinciden</div>
+                <button type="submit" class="upload-btn">Registrarse</button>
+                <button type="button" class="upload-btn" onclick="hideSignupModal()">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="wallet-modal" id="walletModal">
+        <div class="modal-content">
+            <h2>Configurar Billetera</h2>
+            <form class="wallet-form" onsubmit="handleWalletSetup(event)">
+                <select id="paymentType" required>
+                    <option value>Seleccionar m&#xe9;todo de pago</option>
+                    <option value="paypal">PayPal</option>
+                    <option value="bank">Cuenta Bancaria</option>
+                </select>
+                
+                <div id="paypalFields" style="display: none;">
+                    <input type="email" placeholder="Email de PayPal" id="paypalEmail">
+                </div>
+                
+                <div id="bankFields" style="display: none;">
+                    <input type="text" placeholder="Nombre del Banco" id="bankName">
+                    <input type="text" placeholder="N&#xfa;mero de Cuenta" id="accountNumber">
+                    <input type="text" placeholder="C&#xf3;digo Swift/BIC" id="swiftCode">
+                </div>
+                
+                <button type="submit" class="upload-btn">Guardar</button>
+                <button type="button" class="upload-btn" onclick="hideWalletModal()">Cancelar</button>
+            </form>
+            <div class="earnings-info">
+                <h3>Ganancias Totales</h3>
+                <p id="totalEarnings">&#x24;0.00</p>
+                <p class="fee-info">*La plataforma retiene el 20% de las ventas</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-wallet-modal" id="adminWalletModal">
+        <div class="modal-content">
+            <h2>Ganancias de la App</h2>
+            <form class="admin-wallet-form" onsubmit="handleAdminWalletAccess(event)">
+                <input type="password" placeholder="Contrase&#xf1;a de Administrador" id="adminPassword" required>
+                <div class="auth-error" id="adminError">Contrase&#xf1;a incorrecta</div>
+                <button type="submit" class="upload-btn">Acceder</button>
+                <button type="button" class="upload-btn" onclick="hideAdminWalletModal()">Cancelar</button>
+            </form>
+            <div class="earnings-info" id="adminEarningsInfo" style="display: none;">
+                <h3>Ganancias Totales de la App</h3>
+                <p id="adminTotalEarnings">&#x24;0.00</p>
+                <p class="fee-info">*Representa el 20% de todas las ventas</p>
+                
+                <div id="adminPaypalSetup">
+                    <h3>Mi PayPal para Recibir Ganancias</h3>
+                    <form onsubmit="handleAdminPaypalSetup(event)">
+                        <input type="email" id="adminPaypalEmail" placeholder="Email de PayPal" required>
+                        <button type="submit" class="upload-btn">Guardar PayPal</button>
+                    </form>
+                    <p id="currentAdminPaypal"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>const games = [{
+  title: "Super Adventure",
+  description: "Un emocionante juego de aventuras con gráficos increíbles",
+  logo: "",
+  category: "aventura",
+  price: 0,
+  creator: "",
+  sales: 0,
+  platformFee: 0.2,
+  creatorShare: 0.8
+}, {
+  title: "Racing Master",
+  description: "El mejor juego de carreras para tu dispositivo",
+  logo: "",
+  category: "carreras",
+  price: 0,
+  creator: "",
+  sales: 0,
+  platformFee: 0.2,
+  creatorShare: 0.8
+}, {
+  title: "Puzzle Quest",
+  description: "Resuelve increíbles puzzles y desafía tu mente",
+  logo: "",
+  category: "puzzle",
+  price: 0,
+  creator: "",
+  sales: 0,
+  platformFee: 0.2,
+  creatorShare: 0.8
+}, {
+  title: "Zombie Shooter",
+  description: "Sobrevive al apocalipsis zombie",
+  logo: "",
+  category: "disparos",
+  price: 0,
+  creator: "",
+  sales: 0,
+  platformFee: 0.2,
+  creatorShare: 0.8
+}, {
+  title: "Cookie Clicker",
+  description: "Construye tu imperio de galletas",
+  logo: "",
+  category: "idle",
+  price: 0,
+  creator: "",
+  sales: 0,
+  platformFee: 0.2,
+  creatorShare: 0.8
+}, {
+  title: "Farm Life",
+  description: "Gestiona tu propia granja",
+  logo: "",
+  category: "simulador",
+  price: 0,
+  creator: "",
+  sales: 0,
+  platformFee: 0.2,
+  creatorShare: 0.8
+}];
+let currentCategory = 'todos';
+let currentUser = null;
+let platformEarnings = 0;
+let adminPaypalEmail = localStorage.getItem('adminPaypalEmail') || '';
+function loadGames(category = 'todos') {
+  const gamesGrid = document.getElementById('gamesGrid');
+  gamesGrid.innerHTML = '';
+  const filteredGames = category === 'todos' ? games : games.filter(game => game.category === category);
+  filteredGames.forEach(game => {
+    const gameCard = document.createElement('div');
+    gameCard.className = 'game-card';
+    gameCard.innerHTML = `
+      <div class="game-logo">${game.logo}</div>
+      <div class="game-category">${game.category.toUpperCase()}</div>
+      <div class="game-title">${game.title}</div>
+      <div class="game-description">${game.description}</div>
+      <div class="game-price">${game.price > 0 ? `$${game.price.toFixed(2)}` : 'GRATIS'}</div>
+      <button class="download-btn" onclick="handleDownload('${game.title}', ${game.price})">
+        ${game.price > 0 ? 'Comprar APK' : 'Descargar APK'}
+      </button>
+    `;
+    gamesGrid.appendChild(gameCard);
+  });
+}
+document.querySelectorAll('.category-btn').forEach(button => {
+  button.addEventListener('click', e => {
+    document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+    e.target.classList.add('active');
+    currentCategory = e.target.dataset.category;
+    loadGames(currentCategory);
+  });
+});
+function showUploadModal() {
+  if (!currentUser) {
+    alert('Debes iniciar sesión para subir juegos');
+    showLoginModal();
+    return;
+  }
+  document.getElementById('uploadModal').style.display = 'block';
+}
+function hideUploadModal() {
+  document.getElementById('uploadModal').style.display = 'none';
+}
+function handleUpload(event) {
+  event.preventDefault();
+  const formData = new FormData(event.target);
+  const newGame = {
+    title: formData.get('title'),
+    description: formData.get('description'),
+    category: formData.get('category'),
+    logo: formData.get('logo'),
+    price: parseFloat(formData.get('price')) || 0,
+    creator: currentUser.username,
+    sales: 0,
+    platformFee: 0.2,
+    creatorShare: 0.8
+  };
+  games.push(newGame);
+  alert('¡Juego subido exitosamente!');
+  hideUploadModal();
+  loadGames(currentCategory);
+}
+function showLoginModal() {
+  document.getElementById('loginModal').style.display = 'block';
+}
+function hideLoginModal() {
+  document.getElementById('loginModal').style.display = 'none';
+  document.getElementById('loginError').style.display = 'none';
+}
+function showSignupModal() {
+  document.getElementById('signupModal').style.display = 'block';
+}
+function hideSignupModal() {
+  document.getElementById('signupModal').style.display = 'none';
+  document.getElementById('signupError').style.display = 'none';
+}
+function handleLogin(event) {
+  event.preventDefault();
+  const username = document.getElementById('loginUsername').value;
+  const password = document.getElementById('loginPassword').value;
+  const users = JSON.parse(localStorage.getItem('users') || '[]');
+  const user = users.find(u => u.username === username && u.password === password);
+  if (user) {
+    currentUser = user;
+    hideLoginModal();
+    updateAuthUI();
+    alert('¡Bienvenido ' + user.username + '!');
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+  }
+}
+function handleSignup(event) {
+  event.preventDefault();
+  const username = document.getElementById('signupUsername').value;
+  const password = document.getElementById('signupPassword').value;
+  const confirmPassword = document.getElementById('signupConfirmPassword').value;
+  const creatorName = document.getElementById('creatorName').value;
+  if (password !== confirmPassword) {
+    document.getElementById('signupError').style.display = 'block';
+    return;
+  }
+  const users = JSON.parse(localStorage.getItem('users') || '[]');
+  if (users.some(u => u.username === username)) {
+    document.getElementById('signupError').textContent = 'El usuario ya existe';
+    document.getElementById('signupError').style.display = 'block';
+    return;
+  }
+  const newUser = {
+    username,
+    password,
+    creatorName,
+    earnings: 0
+  };
+  users.push(newUser);
+  localStorage.setItem('users', JSON.stringify(users));
+  currentUser = newUser;
+  hideSignupModal();
+  updateAuthUI();
+  alert('¡Cuenta creada exitosamente!');
+}
+function logout() {
+  currentUser = null;
+  updateAuthUI();
+}
+function updateAuthUI() {
+  const loginBtn = document.getElementById('loginBtn');
+  const signupBtn = document.getElementById('signupBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const uploadBtn = document.querySelector('.upload-btn');
+  const walletBtn = document.getElementById('walletBtn');
+  if (currentUser) {
+    loginBtn.style.display = 'none';
+    signupBtn.style.display = 'none';
+    logoutBtn.style.display = 'inline-block';
+    uploadBtn.style.display = 'inline-block';
+    walletBtn.style.display = 'inline-block';
+  } else {
+    loginBtn.style.display = 'inline-block';
+    signupBtn.style.display = 'inline-block';
+    logoutBtn.style.display = 'none';
+    uploadBtn.style.display = 'none';
+    walletBtn.style.display = 'none';
+  }
+}
+function showWalletModal() {
+  document.getElementById('walletModal').style.display = 'block';
+  const totalEarnings = currentUser && currentUser.earnings ? currentUser.earnings : 0;
+  document.getElementById('totalEarnings').textContent = `$${totalEarnings.toFixed(2)}`;
+}
+function hideWalletModal() {
+  document.getElementById('walletModal').style.display = 'none';
+}
+function handleWalletSetup(event) {
+  event.preventDefault();
+  const paymentType = document.getElementById('paymentType').value;
+  let paymentDetails = {};
+  if (paymentType === 'paypal') {
+    paymentDetails = {
+      type: 'paypal',
+      email: document.getElementById('paypalEmail').value
+    };
+  } else if (paymentType === 'bank') {
+    paymentDetails = {
+      type: 'bank',
+      bankName: document.getElementById('bankName').value,
+      accountNumber: document.getElementById('accountNumber').value,
+      swiftCode: document.getElementById('swiftCode').value
+    };
+  }
+  const users = JSON.parse(localStorage.getItem('users') || '[]');
+  const userIndex = users.findIndex(u => u.username === currentUser.username);
+  if (userIndex !== -1) {
+    users[userIndex].paymentDetails = paymentDetails;
+    localStorage.setItem('users', JSON.stringify(users));
+    currentUser = users[userIndex];
+  }
+  hideWalletModal();
+  alert('¡Información de pago guardada exitosamente!');
+}
+document.getElementById('paymentType')?.addEventListener('change', function (e) {
+  const paypalFields = document.getElementById('paypalFields');
+  const bankFields = document.getElementById('bankFields');
+  if (e.target.value === 'paypal') {
+    paypalFields.style.display = 'block';
+    bankFields.style.display = 'none';
+  } else if (e.target.value === 'bank') {
+    paypalFields.style.display = 'none';
+    bankFields.style.display = 'block';
+  } else {
+    paypalFields.style.display = 'none';
+    bankFields.style.display = 'none';
+  }
+});
+document.querySelector('.search-box').addEventListener('input', function (e) {
+  const searchTerm = e.target.value.toLowerCase();
+  const filteredGames = games.filter(game => (currentCategory === 'todos' || game.category === currentCategory) && (game.title.toLowerCase().includes(searchTerm) || game.description.toLowerCase().includes(searchTerm)));
+  const gamesGrid = document.getElementById('gamesGrid');
+  gamesGrid.innerHTML = '';
+  filteredGames.forEach(game => {
+    const gameCard = document.createElement('div');
+    gameCard.className = 'game-card';
+    gameCard.innerHTML = `
+            <div class="game-logo">${game.logo}</div>
+            <div class="game-category">${game.category.toUpperCase()}</div>
+            <div class="game-title">${game.title}</div>
+            <div class="game-description">${game.description}</div>
+            <div class="game-price">${game.price > 0 ? `$${game.price.toFixed(2)}` : 'GRATIS'}</div>
+            <button class="download-btn" onclick="handleDownload('${game.title}', ${game.price})">
+                ${game.price > 0 ? 'Comprar APK' : 'Descargar APK'}
+            </button>
+        `;
+    gamesGrid.appendChild(gameCard);
+  });
+});
+function handleDownload(gameTitle, price) {
+  if (!currentUser) {
+    alert('Debes iniciar sesión para descargar juegos');
+    showLoginModal();
+    return;
+  }
+  const game = games.find(g => g.title === gameTitle);
+  if (price > 0) {
+    if (confirm(`¿Confirmas la compra de ${gameTitle} por $${price.toFixed(2)}?`)) {
+      game.sales++;
+      const platformRevenue = price * 0.2;
+      const creatorRevenue = price * 0.8;
+      platformEarnings += platformRevenue;
+      localStorage.setItem('platformEarnings', platformEarnings.toString());
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const creator = users.find(u => u.username === game.creator);
+      if (creator) {
+        creator.earnings = (creator.earnings || 0) + creatorRevenue;
+        localStorage.setItem('users', JSON.stringify(users));
+      }
+      alert('¡Compra exitosa! Iniciando descarga...');
+    }
+  } else {
+    alert('Iniciando descarga...');
+  }
+}
+function showAdminWalletModal() {
+  document.getElementById('adminWalletModal').style.display = 'block';
+  document.getElementById('adminEarningsInfo').style.display = 'none';
+  document.getElementById('adminError').style.display = 'none';
+  document.getElementById('adminPassword').value = '';
+}
+function hideAdminWalletModal() {
+  document.getElementById('adminWalletModal').style.display = 'none';
+}
+function handleAdminWalletAccess(event) {
+  event.preventDefault();
+  const password = document.getElementById('adminPassword').value;
+  if (password === 'jim') {
+    document.getElementById('adminError').style.display = 'none';
+    document.getElementById('adminEarningsInfo').style.display = 'block';
+    const savedEarnings = localStorage.getItem('platformEarnings');
+    platformEarnings = savedEarnings ? parseFloat(savedEarnings) : platformEarnings;
+    document.getElementById('adminTotalEarnings').textContent = `$${platformEarnings.toFixed(2)}`;
+    document.getElementById('currentAdminPaypal').textContent = adminPaypalEmail ? `PayPal para recibir ganancias: ${adminPaypalEmail}` : 'No hay PayPal configurado';
+  } else {
+    document.getElementById('adminError').style.display = 'block';
+  }
+}
+function handleAdminPaypalSetup(event) {
+  event.preventDefault();
+  const email = document.getElementById('adminPaypalEmail').value;
+  adminPaypalEmail = email;
+  localStorage.setItem('adminPaypalEmail', email);
+  document.getElementById('currentAdminPaypal').textContent = `PayPal para recibir ganancias: ${email}`;
+  alert('PayPal configurado exitosamente. Todas las ganancias de la app (20% de las ventas) serán enviadas a esta cuenta.');
+}
+updateAuthUI();
+loadGames();</script>
+</body>
+</html>
